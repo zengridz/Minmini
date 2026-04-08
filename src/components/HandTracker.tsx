@@ -132,9 +132,6 @@ export function HandTracker({ onPointsUpdate, onHandPresenceUpdate }: HandTracke
           height={240}
           className="w-full h-full object-cover"
         />
-        <div className="absolute top-2 left-2 px-2 py-0.5 bg-black/50 rounded text-[8px] uppercase tracking-widest text-white/80">
-          Live Feed
-        </div>
       </div>
 
       {/* Main Drawing Canvas */}

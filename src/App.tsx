@@ -76,16 +76,16 @@ export default function App() {
           <motion.h1 
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className="text-4xl md:text-7xl tracking-widest text-white/90 font-bitcount"
+            className="text-6xl md:text-9xl text-white/90 font-tangerine"
           >
-            LIGHTNING <span style={{ color: EMERALD_THEME.color }}>MOTHS</span>
+            Lightning <span style={{ color: EMERALD_THEME.color }}>Moths</span>
           </motion.h1>
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.8 }}
             className="flex flex-col items-center gap-2 mt-4"
           >
-            <p className="text-sm md:text-base tracking-widest text-[#00ff88]">
+            <p className="text-sm md:text-base tracking-widest text-white">
               Draw with your palms to attract the moths
             </p>
           </motion.div>
@@ -102,9 +102,6 @@ export default function App() {
           </div>
 
           <div className="flex gap-4">
-            <div className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-[10px] uppercase tracking-widest text-white/40">
-              No Audio Input
-            </div>
           </div>
         </footer>
       </div>
