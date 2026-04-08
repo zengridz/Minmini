@@ -78,9 +78,7 @@ export function HandTracker({ onPointsUpdate, onHandPresenceUpdate }: HandTracke
         const age = now - p.timestamp;
         const opacity = 1 - age / 7000;
         
-        // Glow effect
-        canvasCtx.shadowBlur = 15;
-        canvasCtx.shadowColor = '#00ff88';
+        // REMOVED: Expensive shadowBlur calls that kill performance over time
         canvasCtx.fillStyle = `rgba(0, 255, 136, ${opacity})`;
         
         canvasCtx.beginPath();

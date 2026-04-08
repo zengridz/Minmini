@@ -20,6 +20,15 @@ export function Moth({ id, volume, drawingPoints, isHandPresent, themeColor }: M
   const currentSpeed = useRef(baseSpeed.current);
   const noiseOffset = useRef(Math.random() * 1000);
   
+  // Use refs to avoid effect restarts on every frame
+  const drawingPointsRef = useRef(drawingPoints);
+  const isHandPresentRef = useRef(isHandPresent);
+
+  useEffect(() => {
+    drawingPointsRef.current = drawingPoints;
+    isHandPresentRef.current = isHandPresent;
+  }, [drawingPoints, isHandPresent]);
+
   useEffect(() => {
     let frame: number;
     let trailCounter = 0;
@@ -30,12 +39,13 @@ export function Moth({ id, volume, drawingPoints, isHandPresent, themeColor }: M
       let targetAngle = angle.current;
 
       // Attraction to drawing points - ONLY when hand is present
-      if (isHandPresent && drawingPoints.length > 0) {
+      const currentPoints = drawingPointsRef.current;
+      if (isHandPresentRef.current && currentPoints.length > 0) {
         // Find nearest point
-        let nearestPoint = drawingPoints[0];
+        let nearestPoint = currentPoints[0];
         let minDist = Infinity;
         
-        drawingPoints.forEach(p => {
+        currentPoints.forEach(p => {
           const dx = p.x - x.current;
           const dy = p.y - y.current;
           const dist = dx * dx + dy * dy;
@@ -98,7 +108,7 @@ export function Moth({ id, volume, drawingPoints, isHandPresent, themeColor }: M
 
     move();
     return () => cancelAnimationFrame(frame);
-  }, [controls, volume, drawingPoints, isHandPresent, themeColor]);
+  }, [controls, themeColor]); // Removed drawingPoints and isHandPresent from dependencies
 
   return (
     <motion.div

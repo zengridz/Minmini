@@ -83,6 +83,11 @@ export function ParticleSystem({ volume }: { volume: number }) {
       }
 
       // Update and draw particles
+      const MAX_PARTICLES = 1000;
+      if (particles.current.length > MAX_PARTICLES) {
+        particles.current = particles.current.slice(-MAX_PARTICLES);
+      }
+
       particles.current = particles.current.filter((p) => {
         p.x += p.vx;
         p.y += p.vy;
@@ -110,18 +115,10 @@ export function ParticleSystem({ volume }: { volume: number }) {
           ctx.closePath();
           ctx.fill();
         } else {
-          // Add glow for trail-like particles (dust with high initial opacity)
-          if (p.opacity > 0.5) {
-            ctx.shadowBlur = 10 * p.life;
-            ctx.shadowColor = p.color;
-          } else {
-            ctx.shadowBlur = 0;
-          }
-          
+          // REMOVED: Expensive shadowBlur calls that kill performance over time
           ctx.beginPath();
           ctx.arc(p.x, p.y, p.size * (0.5 + p.life * 0.5), 0, Math.PI * 2);
           ctx.fill();
-          ctx.shadowBlur = 0; // Reset for next particle
         }
         
         return true;
