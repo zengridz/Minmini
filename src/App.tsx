@@ -37,7 +37,7 @@ export default function App() {
   const moths = Array.from({ length: 50 }, (_, i) => i);
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-black font-sans text-white">
+    <div className="relative w-full h-screen overflow-hidden bg-black font-lcd text-white">
       {/* Camera & Hand Tracking Background */}
       <HandTracker onPointsUpdate={handlePointsUpdate} onHandPresenceUpdate={handleHandPresenceUpdate} />
 
@@ -76,16 +76,16 @@ export default function App() {
           <motion.h1 
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className="text-4xl md:text-6xl font-light tracking-tighter text-white/90"
+            className="text-4xl md:text-7xl tracking-widest text-white/90 font-bitcount"
           >
-            LIGHTNING <span className="italic font-serif" style={{ color: EMERALD_THEME.color }}>MOTHS</span>
+            LIGHTNING <span style={{ color: EMERALD_THEME.color }}>MOTHS</span>
           </motion.h1>
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.8 }}
             className="flex flex-col items-center gap-2 mt-4"
           >
-            <p className="text-sm md:text-base font-light tracking-wide text-[#00ff88]">
+            <p className="text-sm md:text-base tracking-widest text-[#00ff88]">
               Draw with your palms to attract the moths
             </p>
           </motion.div>
