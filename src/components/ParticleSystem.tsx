@@ -12,7 +12,7 @@ interface Particle {
   opacity: number;
 }
 
-export function ParticleSystem({ volume }: { volume: number }) {
+export function ParticleSystem({ volume, themeColor }: { volume: number; themeColor: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particles = useRef<Particle[]>([]);
 
@@ -28,8 +28,6 @@ export function ParticleSystem({ volume }: { volume: number }) {
     };
     window.addEventListener('resize', resize);
     resize();
-
-    const colors = ['#FF69B4', '#00CED1', '#9370DB', '#FFA500', '#FFD700', '#7FFF00'];
 
     const handleTrail = (e: any) => {
       const { x, y, color } = e.detail;
@@ -60,7 +58,7 @@ export function ParticleSystem({ volume }: { volume: number }) {
           vx: (Math.random() - 0.5) * 0.3, // Very slow
           vy: (Math.random() - 0.5) * 0.3,
           life: 0.5 + Math.random() * 0.5,
-          color: type === 'pollen' ? '#FFD700' : '#FFFFFF',
+          color: type === 'pollen' ? themeColor : '#FFFFFF',
           size: type === 'pollen' ? 1.5 : 0.8,
           type: type,
           opacity: 0.1 + Math.random() * 0.2,

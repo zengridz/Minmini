@@ -10,10 +10,23 @@ import { Moth } from './components/Moth';
 import { ParticleSystem } from './components/ParticleSystem';
 import { HandTracker } from './components/HandTracker';
 
-const EMERALD_THEME = {
-  color: '#00ff88',
-  bg: 'radial-gradient(circle at 50% 30%, #103a25 0%, transparent 60%), radial-gradient(circle at 10% 80%, #00ff88 0%, transparent 50%)'
-};
+const THEMES = [
+  {
+    name: 'Emerald',
+    color: '#00ff88',
+    bg: 'radial-gradient(circle at 50% 30%, #103a25 0%, transparent 60%), radial-gradient(circle at 10% 80%, #00ff88 0%, transparent 50%)'
+  },
+  {
+    name: 'Pink',
+    color: '#ff00aa',
+    bg: 'radial-gradient(circle at 50% 30%, #3a1025 0%, transparent 60%), radial-gradient(circle at 10% 80%, #ff00aa 0%, transparent 50%)'
+  },
+  {
+    name: 'Purple',
+    color: '#aa00ff',
+    bg: 'radial-gradient(circle at 50% 30%, #25103a 0%, transparent 60%), radial-gradient(circle at 10% 80%, #aa00ff 0%, transparent 50%)'
+  }
+];
 
 interface DrawingPoint {
   x: number;
@@ -26,6 +39,35 @@ export default function App() {
   const [drawingPoints, setDrawingPoints] = useState<DrawingPoint[]>([]);
   const [isHandPresent, setIsHandPresent] = useState(false);
   const [isIdle, setIsIdle] = useState(false);
+  const [refreshTimer, setRefreshTimer] = useState(0);
+  const [themeIndex, setThemeIndex] = useState(0);
+
+  // Load theme index from localStorage on mount
+  useEffect(() => {
+    const savedIndex = localStorage.getItem('moth_theme_index');
+    if (savedIndex !== null) {
+      setThemeIndex(parseInt(savedIndex, 10) % THEMES.length);
+    }
+  }, []);
+
+  // Auto-refresh logic
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRefreshTimer(prev => {
+        if (prev >= 29) {
+          // Increment theme index for next reload
+          const nextIndex = (themeIndex + 1) % THEMES.length;
+          localStorage.setItem('moth_theme_index', nextIndex.toString());
+          window.location.reload();
+          return prev;
+        }
+        return prev + 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [themeIndex]);
+
+  const currentTheme = THEMES[themeIndex];
 
   useEffect(() => {
     if (isHandPresent) {
@@ -59,19 +101,20 @@ export default function App() {
       {/* Atmospheric Background */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <motion.div 
+          key={currentTheme.name}
           initial={{ opacity: 0 }}
           animate={{ opacity: 0.4 }}
           transition={{ duration: 2 }}
           className="absolute inset-0"
           style={{
-            background: EMERALD_THEME.bg,
+            background: currentTheme.bg,
             filter: 'blur(80px)',
           }}
         />
       </div>
 
       {/* Particle System */}
-      <ParticleSystem volume={0} />
+      <ParticleSystem volume={0} themeColor={currentTheme.color} />
 
       {/* Moths */}
       {moths.map((id) => (
@@ -81,7 +124,7 @@ export default function App() {
           volume={0} 
           drawingPoints={drawingPoints}
           isHandPresent={isHandPresent}
-          themeColor={EMERALD_THEME.color} 
+          themeColor={currentTheme.color} 
         />
       ))}
 
@@ -100,14 +143,25 @@ export default function App() {
             animate={{ y: 0, opacity: 1 }}
             className="text-5xl md:text-8xl text-white/90 font-special uppercase tracking-tighter"
           >
-            Lightning <span style={{ color: EMERALD_THEME.color }}>Moths</span>
+            Lightning <span style={{ color: currentTheme.color }}>Moths</span>
           </motion.h1>
         </header>
 
         <div className="flex items-center justify-center">
           <AnimatePresence>
-            {isIdle && !isHandPresent && (
+            {refreshTimer >= 25 ? (
+              <motion.div
+                key="reset-countdown"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
+                className="text-3xl md:text-5xl font-special text-white/80 text-center"
+              >
+                The Garden resets in {30 - refreshTimer}s
+              </motion.div>
+            ) : isIdle && !isHandPresent && (
               <TypewriterText 
+                key="idle-msg"
                 text="Gently wave… they’ll gather" 
                 className="text-2xl md:text-4xl font-special tracking-widest text-white/60 text-center"
               />
@@ -134,7 +188,7 @@ export default function App() {
   );
 }
 
-function TypewriterText({ text, className }: { text: string; className?: string }) {
+function TypewriterText({ text, className, key }: { text: string; className?: string; key?: string }) {
   const characters = text.split("");
   
   const container = {

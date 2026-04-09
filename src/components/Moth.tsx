@@ -111,8 +111,8 @@ export function Moth({ id, volume, drawingPoints, isHandPresent, themeColor }: M
       if (id % 3 === 0) {
         trailCounter++;
         if (trailCounter >= 3) {
-          // Use orangish trail colors to match the new light streaks
-          const trailColor = Math.random() > 0.5 ? '#ffaa00' : '#ffcc00';
+          // Use theme-based trail colors
+          const trailColor = Math.random() > 0.5 ? themeColor : '#ffffff';
           window.dispatchEvent(new CustomEvent('butterfly-trail', {
             detail: { x: x.current, y: y.current, color: trailColor }
           }));
