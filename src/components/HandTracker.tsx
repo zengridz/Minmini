@@ -31,7 +31,7 @@ export function HandTracker({ onPointsUpdate, onHandPresenceUpdate }: HandTracke
     });
 
     hands.setOptions({
-      maxNumHands: 2,
+      maxNumHands: 1,
       modelComplexity: 1,
       minDetectionConfidence: 0.6,
       minTrackingConfidence: 0.6,
