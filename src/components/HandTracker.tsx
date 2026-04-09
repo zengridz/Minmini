@@ -103,23 +103,32 @@ export function HandTracker({ onPointsUpdate, onHandPresenceUpdate }: HandTracke
           const x2 = (p2.x / 100) * canvasRef.current!.width;
           const y2 = (p2.y / 100) * canvasRef.current!.height;
 
-          // Glow pass (Yellow/White)
+          // Glow pass (Orangish/Amber)
           canvasCtx.beginPath();
           canvasCtx.moveTo(x1, y1);
           canvasCtx.lineTo(x2, y2);
-          const glowColor = i % 2 === 0 ? '255, 255, 255' : '255, 255, 100';
-          canvasCtx.strokeStyle = `rgba(${glowColor}, ${opacity * 0.4})`;
-          canvasCtx.lineWidth = 12;
+          // Use a mix of deep orange and amber for the glow
+          const glowColor = i % 2 === 0 ? '255, 120, 0' : '255, 180, 0';
+          canvasCtx.strokeStyle = `rgba(${glowColor}, ${opacity * 0.35})`;
+          canvasCtx.lineWidth = 18; // Wider glow
           canvasCtx.lineCap = 'round';
           canvasCtx.lineJoin = 'round';
           canvasCtx.stroke();
 
-          // Core pass (White)
+          // Secondary glow (Inner Orange)
           canvasCtx.beginPath();
           canvasCtx.moveTo(x1, y1);
           canvasCtx.lineTo(x2, y2);
-          canvasCtx.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
-          canvasCtx.lineWidth = 3;
+          canvasCtx.strokeStyle = `rgba(255, 100, 0, ${opacity * 0.5})`;
+          canvasCtx.lineWidth = 8;
+          canvasCtx.stroke();
+
+          // Core pass (White/Yellow)
+          canvasCtx.beginPath();
+          canvasCtx.moveTo(x1, y1);
+          canvasCtx.lineTo(x2, y2);
+          canvasCtx.strokeStyle = `rgba(255, 255, 200, ${opacity})`;
+          canvasCtx.lineWidth = 2.5;
           canvasCtx.lineCap = 'round';
           canvasCtx.lineJoin = 'round';
           canvasCtx.stroke();

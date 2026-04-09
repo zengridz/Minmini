@@ -15,8 +15,10 @@ export function Moth({ id, volume, drawingPoints, isHandPresent, themeColor }: M
   const x = useRef(Math.random() * 100);
   const y = useRef(Math.random() * 100);
   const angle = useRef(Math.random() * 360);
-  // Moths are faster than butterflies
-  const baseSpeed = useRef(0.3 + Math.random() * 0.4);
+  
+  // 20% of moths are "quick" and highly reactive
+  const isQuick = id % 5 === 0;
+  const baseSpeed = useRef((isQuick ? 0.6 : 0.3) + Math.random() * 0.4);
   const currentSpeed = useRef(baseSpeed.current);
   const noiseOffset = useRef(Math.random() * 1000);
   
@@ -41,29 +43,39 @@ export function Moth({ id, volume, drawingPoints, isHandPresent, themeColor }: M
       // Attraction to drawing points - ONLY when hand is present
       const currentPoints = drawingPointsRef.current;
       if (isHandPresentRef.current && currentPoints.length > 0) {
-        // Find nearest point
-        let nearestPoint = currentPoints[0];
+        let nearestPoint;
         let minDist = Infinity;
-        
-        currentPoints.forEach(p => {
-          const dx = p.x - x.current;
-          const dy = p.y - y.current;
-          const dist = dx * dx + dy * dy;
-          if (dist < minDist) {
-            minDist = dist;
-            nearestPoint = p;
-          }
-        });
 
-        if (minDist < 600) { // Slightly larger attraction radius
+        if (isQuick) {
+          // Quick moths prioritize the LATEST points (the hand itself)
+          // We look at the last 5 points added
+          const latestPoints = currentPoints.slice(-5);
+          nearestPoint = latestPoints[latestPoints.length - 1];
+          const dx = nearestPoint.x - x.current;
+          const dy = nearestPoint.y - y.current;
+          minDist = dx * dx + dy * dy;
+        } else {
+          // Normal moths follow the nearest point in the whole trail
+          nearestPoint = currentPoints[0];
+          currentPoints.forEach(p => {
+            const dx = p.x - x.current;
+            const dy = p.y - y.current;
+            const dist = dx * dx + dy * dy;
+            if (dist < minDist) {
+              minDist = dist;
+              nearestPoint = p;
+            }
+          });
+        }
+
+        if (minDist < (isQuick ? 2500 : 600)) { 
           const dx = nearestPoint.x - x.current;
           const dy = nearestPoint.y - y.current;
           
-          // Add some noise to the target angle so they don't all cluster on the exact same spot
-          const noise = Math.sin(Date.now() / 200 + noiseOffset.current) * 30;
+          const noise = Math.sin(Date.now() / 200 + noiseOffset.current) * (isQuick ? 10 : 30);
           targetAngle = (Math.atan2(dy, dx) * 180) / Math.PI + noise;
           
-          currentSpeed.current = baseSpeed.current * 1.8; // Speed up when attracted
+          currentSpeed.current = baseSpeed.current * (isQuick ? 1.4 : 1.8);
         } else {
           currentSpeed.current = baseSpeed.current;
         }
@@ -71,9 +83,10 @@ export function Moth({ id, volume, drawingPoints, isHandPresent, themeColor }: M
         currentSpeed.current = baseSpeed.current;
       }
 
-      // Smoothly rotate towards target angle or wander
+      // Smoothly rotate towards target angle
       const angleDiff = ((targetAngle - angle.current + 180) % 360) - 180;
-      angle.current += angleDiff * 0.08 + (Math.random() - 0.5) * 15;
+      const rotationSpeed = isQuick ? 0.15 : 0.08;
+      angle.current += angleDiff * rotationSpeed + (Math.random() - 0.5) * (isQuick ? 5 : 15);
       
       const rad = (angle.current * Math.PI) / 180;
       const speed = currentSpeed.current;
@@ -91,14 +104,15 @@ export function Moth({ id, volume, drawingPoints, isHandPresent, themeColor }: M
         left: `${x.current}%`,
         top: `${y.current}%`,
         rotate: angle.current + 90,
-        scale: 0.6, // Constant scale
+        scale: isQuick ? 0.7 : 0.6, 
       });
 
       // Spawn trail particle for some moths
       if (id % 3 === 0) {
         trailCounter++;
         if (trailCounter >= 3) {
-          const trailColor = Math.random() > 0.5 ? '#ffffff' : '#ffffaa';
+          // Use orangish trail colors to match the new light streaks
+          const trailColor = Math.random() > 0.5 ? '#ffaa00' : '#ffcc00';
           window.dispatchEvent(new CustomEvent('butterfly-trail', {
             detail: { x: x.current, y: y.current, color: trailColor }
           }));
