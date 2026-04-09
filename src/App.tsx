@@ -54,7 +54,7 @@ export default function App() {
   useEffect(() => {
     const interval = setInterval(() => {
       setRefreshTimer(prev => {
-        if (prev >= 29) {
+        if (prev >= 299) {
           // Increment theme index for next reload
           const nextIndex = (themeIndex + 1) % THEMES.length;
           localStorage.setItem('moth_theme_index', nextIndex.toString());
@@ -149,7 +149,7 @@ export default function App() {
 
         <div className="flex items-center justify-center">
           <AnimatePresence>
-            {refreshTimer >= 25 ? (
+            {refreshTimer >= 295 ? (
               <motion.div
                 key="reset-countdown"
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -157,7 +157,7 @@ export default function App() {
                 exit={{ opacity: 0 }}
                 className="text-3xl md:text-5xl font-special text-white/80 text-center"
               >
-                The Garden resets in {30 - refreshTimer}s
+                The Garden resets in {300 - refreshTimer}s
               </motion.div>
             ) : isIdle && !isHandPresent && (
               <TypewriterText 
