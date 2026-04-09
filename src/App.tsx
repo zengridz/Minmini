@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useCallback } from 'react';
-import { motion } from 'motion/react';
+import { useState, useCallback, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Hand } from 'lucide-react';
 import { Moth } from './components/Moth';
 import { ParticleSystem } from './components/ParticleSystem';
@@ -25,6 +25,20 @@ interface DrawingPoint {
 export default function App() {
   const [drawingPoints, setDrawingPoints] = useState<DrawingPoint[]>([]);
   const [isHandPresent, setIsHandPresent] = useState(false);
+  const [isIdle, setIsIdle] = useState(false);
+
+  useEffect(() => {
+    if (isHandPresent) {
+      setIsIdle(false);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setIsIdle(true);
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, [isHandPresent]);
 
   const handlePointsUpdate = useCallback((points: DrawingPoint[]) => {
     setDrawingPoints(points);
@@ -73,26 +87,33 @@ export default function App() {
 
       {/* UI Overlay */}
       <div className="relative z-20 flex flex-col items-center justify-between h-full p-8 pointer-events-none">
-        <header className="text-center">
+        <header className="text-center mt-12">
+          <motion.p
+            initial={{ y: -10, opacity: 0 }}
+            animate={{ y: 0, opacity: 0.7 }}
+            className="text-lg md:text-xl font-special tracking-widest text-white/80 mb-2"
+          >
+            Welcome to the garden of
+          </motion.p>
           <motion.h1 
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className="text-6xl md:text-9xl text-white/90 font-tangerine"
+            className="text-5xl md:text-8xl text-white/90 font-special uppercase tracking-tighter"
           >
             Lightning <span style={{ color: EMERALD_THEME.color }}>Moths</span>
           </motion.h1>
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.8 }}
-            className="flex flex-col items-center gap-2 mt-4"
-          >
-            <p className="text-sm md:text-base tracking-widest text-white">
-              Draw with your palms to attract the moths
-            </p>
-          </motion.div>
         </header>
 
-        <div /> {/* Spacer for middle */}
+        <div className="flex items-center justify-center">
+          <AnimatePresence>
+            {isIdle && !isHandPresent && (
+              <TypewriterText 
+                text="Gently wave… they’ll gather" 
+                className="text-2xl md:text-4xl font-special tracking-widest text-white/60 text-center"
+              />
+            )}
+          </AnimatePresence>
+        </div>
 
         <footer className="w-full flex justify-between items-end pointer-events-auto">
           <div className="flex flex-col gap-2">
@@ -110,6 +131,55 @@ export default function App() {
       {/* Vignette */}
       <div className="absolute inset-0 pointer-events-none shadow-[inset_0_0_150px_rgba(0,0,0,0.8)]" />
     </div>
+  );
+}
+
+function TypewriterText({ text, className }: { text: string; className?: string }) {
+  const characters = text.split("");
+  
+  const container = {
+    hidden: { opacity: 0 },
+    visible: (i = 1) => ({
+      opacity: 1,
+      transition: { staggerChildren: 0.08, delayChildren: 0.04 * i },
+    }),
+    exit: {
+      opacity: 0,
+      transition: { duration: 0.3 }
+    }
+  };
+
+  const child = {
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: "spring",
+        damping: 12,
+        stiffness: 100,
+      },
+    },
+    hidden: {
+      opacity: 0,
+      y: 10,
+    },
+  };
+
+  return (
+    <motion.div
+      style={{ display: "flex", overflow: "hidden" }}
+      variants={container}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+      className={className}
+    >
+      {characters.map((char, index) => (
+        <motion.span variants={child} key={index}>
+          {char === " " ? "\u00A0" : char}
+        </motion.span>
+      ))}
+    </motion.div>
   );
 }
 
