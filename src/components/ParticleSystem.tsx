@@ -36,13 +36,13 @@ export function ParticleSystem({ volume }: { volume: number }) {
       particles.current.push({
         x: (x / 100) * canvas.width,
         y: (y / 100) * canvas.height,
-        vx: (Math.random() - 0.5) * 0.05,
-        vy: (Math.random() - 0.5) * 0.05,
-        life: 1.0, // Full life for 3 seconds
-        color: color || '#00ff88',
-        size: 1.5 + Math.random() * 1.5,
-        type: 'dust', // Using dust type but with specific life
-        opacity: 0.8, // Brighter start
+        vx: (Math.random() - 0.5) * 0.1,
+        vy: (Math.random() - 0.5) * 0.1,
+        life: 0.8 + Math.random() * 0.4,
+        color: color || '#ffffff',
+        size: 1.0 + Math.random() * 1.5,
+        type: 'dust',
+        opacity: 0.9,
       });
     };
 
@@ -115,10 +115,19 @@ export function ParticleSystem({ volume }: { volume: number }) {
           ctx.closePath();
           ctx.fill();
         } else {
-          // REMOVED: Expensive shadowBlur calls that kill performance over time
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.size * (0.5 + p.life * 0.5), 0, Math.PI * 2);
-          ctx.fill();
+          // Draw as a small line if it's a trail particle (dust with high opacity)
+          if (p.opacity > 0.5) {
+            ctx.lineWidth = p.size;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(p.x - p.vx * 10, p.y - p.vy * 10);
+            ctx.stroke();
+          } else {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size * (0.5 + p.life * 0.5), 0, Math.PI * 2);
+            ctx.fill();
+          }
         }
         
         return true;

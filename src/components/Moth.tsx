@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 interface MothProps {
   id: number;
   volume: number;
-  drawingPoints: { x: number; y: number; timestamp: number }[];
+  drawingPoints: { x: number; y: number; timestamp: number; handId: number }[];
   isHandPresent: boolean;
   themeColor: string;
   key?: number;
@@ -94,13 +94,16 @@ export function Moth({ id, volume, drawingPoints, isHandPresent, themeColor }: M
         scale: 0.6, // Constant scale
       });
 
-      // Spawn trail particle
-      trailCounter++;
-      if (trailCounter >= 2) {
-        window.dispatchEvent(new CustomEvent('butterfly-trail', {
-          detail: { x: x.current, y: y.current, color: themeColor }
-        }));
-        trailCounter = 0;
+      // Spawn trail particle for some moths
+      if (id % 3 === 0) {
+        trailCounter++;
+        if (trailCounter >= 3) {
+          const trailColor = Math.random() > 0.5 ? '#ffffff' : '#ffffaa';
+          window.dispatchEvent(new CustomEvent('butterfly-trail', {
+            detail: { x: x.current, y: y.current, color: trailColor }
+          }));
+          trailCounter = 0;
+        }
       }
 
       frame = requestAnimationFrame(move);

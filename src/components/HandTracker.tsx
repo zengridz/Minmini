@@ -6,6 +6,7 @@ interface Point {
   x: number;
   y: number;
   timestamp: number;
+  handId: number;
 }
 
 interface HandTrackerProps {
@@ -55,36 +56,76 @@ export function HandTracker({ onPointsUpdate, onHandPresenceUpdate }: HandTracke
       if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
         const landmarksList = results.multiHandLandmarks;
         
-        for (const landmarks of landmarksList) {
+        for (let i = 0; i < landmarksList.length; i++) {
+          const landmarks = landmarksList[i];
           const palm = landmarks[9];
           const x = (1 - palm.x) * 100; // Mirror X
           const y = palm.y * 100;
 
-          pointsRef.current.push({ x, y, timestamp: now });
+          pointsRef.current.push({ x, y, timestamp: now, handId: i });
           newPointsAdded = true;
         }
       }
 
-      // Filter out points older than 7 seconds
-      pointsRef.current = pointsRef.current.filter(p => now - p.timestamp < 7000);
+      // Filter out points older than 15 seconds
+      pointsRef.current = pointsRef.current.filter(p => now - p.timestamp < 15000);
       
       if (newPointsAdded || pointsRef.current.length > 0) {
         onPointsUpdate([...pointsRef.current]);
       }
 
-      // Draw the "ink" - make it much brighter and more visible
+      // Draw the "light streaks"
       canvasCtx.save();
+      
+      // Group points by handId
+      const pointsByHand: Record<number, Point[]> = {};
       pointsRef.current.forEach(p => {
-        const age = now - p.timestamp;
-        const opacity = 1 - age / 7000;
-        
-        // REMOVED: Expensive shadowBlur calls that kill performance over time
-        canvasCtx.fillStyle = `rgba(0, 255, 136, ${opacity})`;
-        
-        canvasCtx.beginPath();
-        canvasCtx.arc((p.x / 100) * canvasRef.current!.width, (p.y / 100) * canvasRef.current!.height, 8, 0, Math.PI * 2);
-        canvasCtx.fill();
+        if (!pointsByHand[p.handId]) pointsByHand[p.handId] = [];
+        pointsByHand[p.handId].push(p);
       });
+
+      Object.values(pointsByHand).forEach(handPoints => {
+        if (handPoints.length < 2) return;
+
+        for (let i = 1; i < handPoints.length; i++) {
+          const p1 = handPoints[i-1];
+          const p2 = handPoints[i];
+          
+          // Only connect if they are close in time to avoid jumps
+          if (p2.timestamp - p1.timestamp > 300) continue;
+
+          const age = now - p2.timestamp;
+          const opacity = 1 - age / 15000;
+          if (opacity <= 0) continue;
+
+          const x1 = (p1.x / 100) * canvasRef.current!.width;
+          const y1 = (p1.y / 100) * canvasRef.current!.height;
+          const x2 = (p2.x / 100) * canvasRef.current!.width;
+          const y2 = (p2.y / 100) * canvasRef.current!.height;
+
+          // Glow pass (Yellow/White)
+          canvasCtx.beginPath();
+          canvasCtx.moveTo(x1, y1);
+          canvasCtx.lineTo(x2, y2);
+          const glowColor = i % 2 === 0 ? '255, 255, 255' : '255, 255, 100';
+          canvasCtx.strokeStyle = `rgba(${glowColor}, ${opacity * 0.4})`;
+          canvasCtx.lineWidth = 12;
+          canvasCtx.lineCap = 'round';
+          canvasCtx.lineJoin = 'round';
+          canvasCtx.stroke();
+
+          // Core pass (White)
+          canvasCtx.beginPath();
+          canvasCtx.moveTo(x1, y1);
+          canvasCtx.lineTo(x2, y2);
+          canvasCtx.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
+          canvasCtx.lineWidth = 3;
+          canvasCtx.lineCap = 'round';
+          canvasCtx.lineJoin = 'round';
+          canvasCtx.stroke();
+        }
+      });
+      
       canvasCtx.restore();
     });
 

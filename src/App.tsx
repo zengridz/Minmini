@@ -19,6 +19,7 @@ interface DrawingPoint {
   x: number;
   y: number;
   timestamp: number;
+  handId: number;
 }
 
 export default function App() {
