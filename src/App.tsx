@@ -143,7 +143,7 @@ export default function App() {
             animate={{ y: 0, opacity: 1 }}
             className="text-5xl md:text-8xl text-white/90 font-special uppercase tracking-tighter"
           >
-            Lightning <span style={{ color: currentTheme.color }}>Moths</span>
+            Lighting <span style={{ color: currentTheme.color }}>Moths</span>
           </motion.h1>
         </header>
 
