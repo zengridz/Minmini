@@ -134,14 +134,14 @@ export default function App() {
           <motion.p
             initial={{ y: -10, opacity: 0 }}
             animate={{ y: 0, opacity: 0.7 }}
-            className="text-lg md:text-xl font-special tracking-widest text-white/80 mb-2"
+            className="text-lg md:text-xl font-space tracking-widest text-white/80 mb-2"
           >
             Welcome to the garden of
           </motion.p>
           <motion.h1 
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className="text-5xl md:text-8xl text-white/90 font-special uppercase tracking-tighter"
+            className="text-5xl md:text-8xl text-white/90 font-silkscreen uppercase leading-[0.75] tracking-[-0.15em]"
           >
             Lighting <span style={{ color: currentTheme.color }}>Moths</span>
           </motion.h1>
@@ -163,7 +163,7 @@ export default function App() {
               <TypewriterText 
                 key="idle-msg"
                 text="Gently wave… they’ll gather" 
-                className="text-2xl md:text-4xl font-special tracking-widest text-white/60 text-center"
+                className="text-2xl md:text-4xl font-space tracking-widest text-white/60 text-center"
               />
             )}
           </AnimatePresence>
